@@ -6,13 +6,23 @@ const restartButton = document.getElementById('restart');
 
 // 游戏配置
 const GRID_SIZE = 15; // 15x15的棋盘
-const CELL_SIZE = canvas.width / GRID_SIZE;
-const PIECE_RADIUS = CELL_SIZE * 0.4;
+let CELL_SIZE; // 动态计算格子大小
+let PIECE_RADIUS; // 动态计算棋子半径
 
 // 游戏状态
 let gameBoard = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
 let currentPlayer = 'black'; // 'black' 或 'white'
 let gameOver = false;
+
+// 更新画布尺寸
+function updateCanvasSize() {
+    const size = Math.min(600, Math.min(window.innerWidth * 0.95, window.innerHeight * 0.95));
+    canvas.width = size;
+    canvas.height = size;
+    CELL_SIZE = canvas.width / GRID_SIZE;
+    PIECE_RADIUS = CELL_SIZE * 0.4;
+    drawBoard();
+}
 
 // 绘制棋盘
 function drawBoard() {
@@ -63,8 +73,10 @@ function handleClick(event) {
     if (gameOver) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
 
     // 计算点击的格子位置
     const i = Math.floor(y / CELL_SIZE);
@@ -133,6 +145,7 @@ function restart() {
 // 添加事件监听器
 canvas.addEventListener('click', handleClick);
 restartButton.addEventListener('click', restart);
+window.addEventListener('resize', updateCanvasSize);
 
 // 初始化游戏
-drawBoard(); 
+updateCanvasSize(); 
